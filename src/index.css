@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Google Sans", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    background-color: #060911;
+    color: #e0e1f7;
+    font-family: var(--font-sans);
+  }
+}
+
+/* Subtle cyan dot-matrix background from Stitch Cyber-Arcade HUD */
+.hud-dot-grid {
+  background-color: #060911;
+  background-image: radial-gradient(rgba(0, 229, 255, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Subtle CRT scanline texture overlay */
+.crt-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(224, 225, 247, 0.015) 0px,
+    rgba(224, 225, 247, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Floating cyan pixel corner L-brackets around HUD panels */
+.hud-panel {
+  position: relative;
+}
+
+.hud-panel::before,
+.hud-panel::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+}
+
+.hud-panel::before {
+  top: -5px;
+  left: -5px;
+  border-top: 1.5px solid rgba(0, 229, 255, 0.45);
+  border-left: 1.5px solid rgba(0, 229, 255, 0.45);
+}
+
+.hud-panel::after {
+  bottom: -5px;
+  right: -5px;
+  border-bottom: 1.5px solid rgba(0, 229, 255, 0.45);
+  border-right: 1.5px solid rgba(0, 229, 255, 0.45);
+}
+
+@keyframes hud-scan-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateY(320%);
+    opacity: 0.15;
+  }
+}
+
+.animate-hud-sweep {
+  animation: hud-scan-sweep 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hud-sweep {
+    animation: none;
+  }
+}
+
+/* Scrollbar for terminal textareas and logs */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060911;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1b2436;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #28354e;
+}

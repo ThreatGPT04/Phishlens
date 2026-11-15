@@ -1,0 +1,6 @@
+{
+  "name": "PhishLens",
+  "description": "Retro-modern arcade HUD threat triage console for safely inspecting suspicious emails, URLs, redirects, and ClickFix lures.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

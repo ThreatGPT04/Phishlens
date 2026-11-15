@@ -1,0 +1,32 @@
+Build the complete, working "PhishLens" web application using the attached Stitch-exported Arcade theme UI design and Google Sans typography.
+
+Strict Security & Architecture Rules:
+1. ZERO EXECUTION / ZERO FETCHING: The app must NEVER fetch, curl, render as HTML, or execute anything pasted by the user. All pasted inputs and AI outputs must be rendered strictly as escaped plain text (`textContent` / safe JSX text interpolation).
+2. SERVER-SIDE GEMINI INTEGRATION: Keep the Gemini API key strictly on the server side (e.g., via a backend `/api/analyze` route using `process.env.GEMINI_API_KEY` and `@google/genai`). Never expose the API key in frontend client code.
+
+Functional Requirements:
+1. Input & Synthetic Samples:
+   - Wire up the main textarea to accept emails (headers + body), URLs/redirect links, or ClickFix lures (`Win+R`, `mshta`, PowerShell, `curl | bash`).
+   - Implement the "Load Sample" dropdown with 3 realistic synthetic examples:
+     a) ClickFix "Verify You Are Human" lure containing an obfuscated Base64 PowerShell command pointing to `hxxps://cdn-verify.example.invalid/payload.ps1`.
+     b) Spoofed Microsoft 365 password-expiry phishing email with failing `SPF: fail` / `DMARC: fail` headers and a lookalike login URL.
+     c) OAuth open-redirect URL (`https://accounts.example.com/auth/redirect?next=hxxp://evil-login.example.invalid/steal`) to test URL/redirection judgement.
+
+2. Gemini Analysis Endpoint (`POST /api/analyze`):
+   - Use Gemini (`gemini-2.5-flash`) with `responseMimeType: "application/json"` and a strict `responseSchema` enforcing these exact fields:
+     - `verdict`: `"Malicious"` | `"Suspicious"` | `"Likely Safe"`
+     - `risk_score`: integer (`0` to `100`)
+     - `attack_type`: string (e.g., `"ClickFix"`, `"Credential Phishing"`, `"Open Redirect"`, `"BEC"`, `"Benign"`)
+     - `redirect_analysis`: object `{ has_redirect: boolean, visible_url: string, true_destination: string, assessment: string }` (defanged)
+     - `red_flags`: array of `{ indicator: string, why_it_matters: string }`
+     - `decoded_command`: object `{ command_present: boolean, obfuscation_spotted: string, step_by_step: array of strings }`
+     - `iocs`: object `{ domains: string[], urls: string[], ips: string[], files: string[], commands: string[] }` (all domains/URLs/IPs strictly defanged with `hxxp` and `[.]`)
+     - `mitre_attack`: array of `{ technique_id: string, name: string }`
+     - `recommended_actions`: array of strings
+     - `user_awareness_tip`: single sentence string
+
+3. Interactive UI States (preserving the Stitch Arcade design & Google Sans font):
+   - Map `"Malicious"` to a Red Flag badge/theme, `"Suspicious"` to an Amber Warning badge/theme, and `"Likely Safe"` to a Green Flag badge/theme, animating the `0–100` arcade risk gauge smoothly on each scan.
+   - Show a clean arcade scanning loader while awaiting the API response, and display clear, actionable error banners if the input is empty or the API request fails.
+   - Make "Copy All IOCs" copy a clean categorized list of defanged IOCs to the clipboard with a "Copied!" toast/badge confirmation.
+   - Make "Generate Incident Ticket" open a modal containing a ready-to-paste SOC ticket (Title, Verdict/Severity, Attack Type, Summary, Defanged IOCs, MITRE IDs, and Containment Actions) with a one-click "Copy Ticket" button.
